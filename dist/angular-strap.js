@@ -1,6 +1,6 @@
 /**
  * AngularStrap - Twitter Bootstrap directives for AngularJS
- * @version v0.7.7 - 2013-10-04
+ * @version v0.7.7 - 2013-11-13
  * @link http://mgcrea.github.com/angular-strap
  * @author Olivier Louvignes <olivier@mg-crea.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -190,7 +190,7 @@
             if (controller) {
               $timeout(function () {
                 iElement.find('[value]').button().filter('[value="' + controller.$viewValue + '"]').addClass('active');
-              });
+              }, 0, false);
               iElement.on('click.button.data-api', function (ev) {
                 scope.$apply(function () {
                   controller.$setViewValue($(ev.target).closest('button').attr('value'));
@@ -315,12 +315,13 @@
               'todayHighlight',
               'keyboardNavigation',
               'language',
-              'forceParse'
+              'forceParse',
+              'beforeShowDay'
             ], function (key) {
               if (angular.isDefined(attrs[key]))
                 options[key] = attrs[key];
             });
-            var language = options.language || 'en', readFormat = attrs.dateFormat || options.format || $.fn.datepicker.dates[language] && $.fn.datepicker.dates[language].format || 'mm/dd/yyyy', format = isAppleTouch ? 'yyyy-mm-dd' : readFormat, dateFormatRegexp = regexpForDateFormat(format, language);
+            var language = options.language || 'en', readFormat = attrs.dateFormat || options.format || $.fn.datepicker.dates[language] && $.fn.datepicker.dates[language].format || 'mm/dd/yyyy', format = isAppleTouch ? 'yyyy-mm-dd' : readFormat, dateFormatRegexp = regexpForDateFormat(format, language), beforeShowDay = scope.$eval(attrs.beforeShowDay);
             if (controller) {
               controller.$formatters.unshift(function (modelValue) {
                 return getFormattedModelValue(modelValue, readFormat, language);
@@ -365,7 +366,8 @@
               }
               element.datepicker(angular.extend(options, {
                 format: format,
-                language: language
+                language: language,
+                beforeShowDay: beforeShowDay
               }));
               scope.$on('$destroy', function () {
                 var datepicker = element.data('datepicker');
@@ -679,10 +681,11 @@
         restrict: 'A',
         require: '?ngModel',
         link: function postLink(scope, element, attrs, controller) {
-          var options = scope.$eval(attrs.bsSelect) || {};
+          var options = scope.$eval(attrs.bsSelect) || {}, selectpicker;
           $timeout(function () {
             element.selectpicker(options);
-            element.next().removeClass('ng-scope');
+            selectpicker = element.next('.bootstrap-select');
+            selectpicker.removeClass('ng-scope');
           });
           if (controller) {
             var refresh = function (newValue, oldValue) {
@@ -690,6 +693,17 @@
                 element.selectpicker('refresh');
               }
             };
+            var checkValidity = function (value) {
+              if (selectpicker) {
+                selectpicker.toggleClass('ng-invalid', !controller.$valid).toggleClass('ng-valid', controller.$valid).toggleClass('ng-invalid-required', !controller.$valid).toggleClass('ng-valid-required', controller.$valid).toggleClass('ng-dirty', controller.$dirty).toggleClass('ng-pristine', controller.$pristine);
+              }
+              return value;
+            };
+            controller.$parsers.push(checkValidity);
+            controller.$formatters.push(checkValidity);
+            attrs.$observe('required', function () {
+              checkValidity(controller.$viewValue);
+            });
             scope.$watch(attrs.ngModel, function (newValue, oldValue) {
               refresh(newValue, oldValue);
             });
