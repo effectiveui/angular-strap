@@ -1,12 +1,12 @@
 /**
  * AngularStrap - Twitter Bootstrap directives for AngularJS
- * @version v0.7.8 - 2013-11-15
+ * @version v0.7.8 - 2013-12-05
  * @link http://mgcrea.github.com/angular-strap
  * @author Olivier Louvignes <olivier@mg-crea.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
 
-(function (window, document, undefined) {
+(function (window, document, $, undefined) {
   'use strict';
   angular.module('$strap.config', []).value('$strapConfig', {});
   angular.module('$strap.filters', ['$strap.config']);
@@ -363,9 +363,10 @@
             } else {
               if (controller) {
                 element.on('changeDate', function (ev) {
-                  scope.$apply(function () {
+                  function fn() {
                     controller.$setViewValue(type === 'string' ? element.val() : ev.date);
-                  });
+                  }
+                  scope.$$phase || scope.$root.$$phase ? fn() : scope.$apply(fn);
                 });
               }
               element.datepicker(angular.extend(options, {
@@ -1042,4 +1043,4 @@
       };
     }
   ]);
-}(window, document));
+}(window, document, window.jQuery));
