@@ -60,7 +60,8 @@ angular.module('$strap.directives')
         if (modelValue && type === 'iso' && ISODateRegexp.test(modelValue)) {
           return $.fn.datepicker.DPGlobal.parseDate(new Date(modelValue), $.fn.datepicker.DPGlobal.parseFormat(format), language);
         } else if(modelValue && type === 'date' && angular.isString(modelValue)) {
-          return $.fn.datepicker.DPGlobal.parseDate(modelValue, $.fn.datepicker.DPGlobal.parseFormat(format), language);
+          // return $.fn.datepicker.DPGlobal.parseDate(modelValue, $.fn.datepicker.DPGlobal.parseFormat(format), language);
+          return moment(modelValue).format('MM/DD/YYYY');
         } else {
           return modelValue;
         }
@@ -95,7 +96,8 @@ angular.module('$strap.directives')
               return null;
             } else if ((type === 'date' || type === 'iso') && angular.isDate(viewValue)) {
               controller.$setValidity('date', true);
-              return viewValue;
+              // return viewValue;
+              return moment(viewValue).format('YYYY-MM-DD');
             } else if(angular.isString(viewValue) && dateFormatRegexp.test(viewValue)) {
               controller.$setValidity('date', true);
               if(isAppleTouch) return new Date(viewValue);
