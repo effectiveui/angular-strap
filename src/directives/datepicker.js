@@ -100,8 +100,9 @@ angular.module('$strap.directives')
               return moment(viewValue).format('YYYY-MM-DD');
             } else if(angular.isString(viewValue) && dateFormatRegexp.test(viewValue)) {
               controller.$setValidity('date', true);
-              if(isAppleTouch) return new Date(viewValue);
-              return type === 'string' ? viewValue : $.fn.datepicker.DPGlobal.parseDate(viewValue, $.fn.datepicker.DPGlobal.parseFormat(format), language);
+              // if(isAppleTouch) return new Date(viewValue);
+              // return type === 'string' ? viewValue : $.fn.datepicker.DPGlobal.parseDate(viewValue, $.fn.datepicker.DPGlobal.parseFormat(format), language);
+              return moment(viewValue).format('YYYY-MM-DD');
             } else {
               controller.$setValidity('date', false);
               return undefined;
